@@ -10,5 +10,13 @@ import scrapy
 
 class DeranafmItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
+    song = scrapy.Field()
+    mainArtist = scrapy.Field()
+    music = scrapy.Field()
+    lyrics = scrapy.Field()
+    visits = scrapy.Field()
+    downloads = scrapy.Field()
+    downloadFormats = scrapy.Field()
+    videoURI = scrapy.Field()
+    url = scrapy.Field()
     pass
