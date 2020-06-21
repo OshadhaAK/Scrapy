@@ -17,5 +17,6 @@ class DeranafmItem(scrapy.Item):
     visits = scrapy.Field()
     downloads = scrapy.Field()
     videoURI = scrapy.Field()
+    downloadFormats = scrapy.Field()
     url = scrapy.Field()
     pass
