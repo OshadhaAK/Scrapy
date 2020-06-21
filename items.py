@@ -16,7 +16,6 @@ class DeranafmItem(scrapy.Item):
     lyrics = scrapy.Field()
     visits = scrapy.Field()
     downloads = scrapy.Field()
-    downloadFormats = scrapy.Field()
     videoURI = scrapy.Field()
     url = scrapy.Field()
     pass

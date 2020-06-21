@@ -16,7 +16,7 @@ class Song(scrapy.Spider):
 
     def parse(self, response):
         for href in response.xpath("//div[contains(@class, 'item col-6 col-sm-4 col-md-3 col-lg-4 col-xl-3')]/article[contains(@class, 'radio-item artist')]/figure/a[contains(@class, 'inner-click')]//@href"):
-            url = "http:" + href.extract()
+            url = "http://www.fmderana.lk/" + href.extract()
             yield scrapy.Request(url, callback=self.parse_dir_contents)
 
 
@@ -29,9 +29,7 @@ class Song(scrapy.Spider):
         item['lyrics'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Lyrics')]/following-sibling::dd[1]/text()").extract()[0].strip()
         item['visits'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Visits')]/following-sibling::dd[1]/text()").extract()[0].strip()
         item['downloads'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Downloads')]/following-sibling::dd[1]/text()").extract()[0].strip()
-        for j in response.xpath("//div[contains(@class, 'video-icons')]/ul[contains(@class, 'icons-list')]/li/a[contains(@class, 'btn btn-default btn-action btn-download')]//@href").extract():
-            item['downloadFormats'] += [j.strip().split("=")[-1]]
-        item['video'] = response.xpath("//div[contains(@class, 'embed-responsive embed-responsive-16by9')]/iframe[contains(@class, 'embed-responsive-item')]//@src").extract()[0].strip()
+        item['videoURI'] = response.xpath("//div[contains(@class, 'embed-responsive embed-responsive-16by9')]/iframe[contains(@class, 'embed-responsive-item')]//@src").extract()[0].strip()
         item['url'] = response.xpath("//meta[@property='og:url']/@content").extract()
 
         yield item
