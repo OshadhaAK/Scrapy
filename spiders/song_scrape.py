@@ -31,7 +31,7 @@ class Song(scrapy.Spider):
         item['downloads'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Downloads')]/following-sibling::dd[1]/text()").extract()[0].strip()
         for j in response.xpath("//div[contains(@class, 'video-icons')]/ul[contains(@class, 'icons-list')]/li/a[contains(@class, 'btn btn-default btn-action btn-download')]//@href").extract():
             item['downloadFormats'] += [j.strip().split("=")[-1]]
-        item['video'] = response.xpath("").extract()[0].strip()
+        item['video'] = response.xpath("//div[contains(@class, 'embed-responsive embed-responsive-16by9')]/iframe[contains(@class, 'embed-responsive-item')]//@src").extract()[0].strip()
         item['url'] = response.xpath("//meta[@property='og:url']/@content").extract()
 
         yield item
