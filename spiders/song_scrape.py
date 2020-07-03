@@ -1,41 +1,47 @@
 import sys
 sys.path.append(".")
 import scrapy
-from items import DeranafmItem
+from items import SongItem
+
 
 class Song(scrapy.Spider):
     name = "song_scraper"
 
-    start_urls = ["http://www.fmderana.lk/sinhala-music-videos"]
+    start_urls = ["https://sinhalasongbook.com/all-sinhala-song-lyrics-and-chords/"]
 
-    npages = 66
+    npages = 20
 
     # This mimics getting the pages using the next button.
     for i in range(1, npages + 2):
-        start_urls.append("http://www.fmderana.lk/sinhala-music-videos/page/" + str(i).strip())
+        start_urls.append("https://sinhalasongbook.com/all-sinhala-song-lyrics-and-chords/?_page=" + str(i).strip())
 
     def parse(self, response):
-        for href in response.xpath("//div[contains(@class, 'item col-6 col-sm-4 col-md-3 col-lg-4 col-xl-3')]/article[contains(@class, 'radio-item artist')]/figure/a[contains(@class, 'inner-click')]//@href"):
-            url = "http://www.fmderana.lk/" + href.extract()
+        for href in response.xpath("//div[contains(@class, 'col-md-6 col-sm-6 col-xs-12 pt-cv-content-item pt-cv-1-col')]/div[contains(@class, 'pt-cv-ifield')]/h4[contains(@class, 'pt-cv-title')]/a//@href"):
+            url = href.extract()
             yield scrapy.Request(url, callback=self.parse_dir_contents)
 
 
+
     def parse_dir_contents(self, response):
-        item = DeranafmItem()
+        item = SongItem()
         formats = []
         try:
-            item['song'] = response.xpath("//div[contains(@class, 'video-content')]/h1/text()").extract()[0].strip()
-            item['mainArtist'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Main Artist')]/following-sibling::dd[1]/text()").extract()[0].strip()
-            item['music'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Music')]/following-sibling::dd[1]/text()").extract()[0].strip()
-            item['lyrics'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Lyrics')]/following-sibling::dd[1]/text()").extract()[0].strip()
-            item['visits'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Visits')]/following-sibling::dd[1]/text()").extract()[0].strip()
-            item['downloads'] = response.xpath("//div[contains(@class, 'video-extra-info')]/dl[contains(@class, 'details-list')]/dt[contains(text(), 'Downloads')]/following-sibling::dd[1]/text()").extract()[0].strip()
-            item['videoURI'] = response.xpath("//div[contains(@class, 'embed-responsive embed-responsive-16by9')]/iframe[contains(@class, 'embed-responsive-item')]//@src").extract()[0].strip()
-            for j in response.xpath("//div[contains(@class, 'video-icons')]/ul[contains(@class, 'icons-list')]/li/a[contains(@class, 'btn btn-default btn-action btn-download')]//@href").extract():
-                formats += [j.strip().split("=")[-1]]
-            item['downloadFormats'] = formats
-            item['url'] = response.xpath("//meta[@property='og:url']/@content").extract()
+            item['song'] = response.xpath("//div[contains(@class, 'entry-content')]/h2/span/text()").extract()[0].strip()
+            item['artist'] = response.xpath("//div[contains(@class, 'su-column-inner su-u-clearfix su-u-trim')]/div/ul/li/span[contains(text(), 'Artist: ')]/a/text()").extract()[0].strip()
+            item['music'] = response.xpath("//div[contains(@class, 'su-column-inner su-u-clearfix su-u-trim')]/ul/li/span[contains(text(), 'Music: ')]/a/text()").extract()[0].strip()
+            lyrics = response.xpath("//div[contains(@class, 'su-column-inner su-u-clearfix su-u-trim')]/pre/text()").extract()
+            for element in lyrics:
+                formats.append(element.strip())
+            item['lyrics'] = formats
+            item['visits'] = response.xpath("//div[contains(@class, 'tptn_counter')]/text()").extract()[0].split(" ")[2].split("V")[0]
+
+            item['writer'] = response.xpath("//div[contains(@class, 'su-column-inner su-u-clearfix su-u-trim')]/ul/li/span[contains(text(), 'Lyrics: ')]/a/text()").extract()[0].strip()
+            item['genre'] = response.xpath("//div[contains(@class, 'su-column-inner su-u-clearfix su-u-trim')]/div/ul/li/span[contains(text(), 'Genre: ')]/a/text()").extract()
+            item['postedBy'] = response.xpath("//div[contains(@class, 'su-column-inner su-u-clearfix su-u-trim')]/div/ul/li/span[contains(text(), 'Posted by: ')]/a/span/text()").extract()[0]
+            item['guitarKey'] = response.xpath("//div[contains(@class, 'entry-content')]/h3/text()").extract()[0].split("|")[0].split(":")[1]
+
         except IndexError:
             pass
 
         yield item
+
